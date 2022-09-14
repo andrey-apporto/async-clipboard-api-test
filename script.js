@@ -92,7 +92,7 @@ function checkClipboard() {
 
     if (navigator.clipboard && navigator.clipboard.read) {
     
-        navigator.clipboard.read().then(async function dataRead(data) {
+        navigator.clipboard.read().then(function dataRead(data) {
 
             var mimeType = "";
             for (var i = 0; i < data[0].types.length; i++) {
@@ -109,16 +109,20 @@ function checkClipboard() {
             }
 
             var blob = null;
-            try{
+            try {
                 if (mimeType == "text/plain") {
-                    blob = await data[0].getType("text/plain");
-                    if (!!blob) {
-                        blob = await blob.text();
-                        out.value = blob;
-                    }
+                    data[0].getType("text/plain").then(function typeRead(obj) {
+                        obj.text().then(function textRead(text) {
+                            blob = text;
+                            out.value = text;
+                            log('Text pasted automatically.');
+                        });
+                    });
                 }
                 else if (mimeType == "image/png") {
-                    blob = await data[0].getType("image/png");
+                    data[0].getType("image/png").then(function typeRead(obj) {
+                        blob = obj;
+                    });
                 }
                 else {
                     mimeType = "text/plain";
@@ -130,8 +134,9 @@ function checkClipboard() {
             }
 
         })
-        .catch(() => {
+        .catch((err) => {
             log('Failed to read clipboard when focusing this page');
+            console.error(err.name, err.message);
         });
 
     }

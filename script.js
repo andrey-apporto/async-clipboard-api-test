@@ -9,10 +9,48 @@ copy.onclick = function () {
 
 /** Read from clipboard when clicking the Paste button */
 paste.onclick = function () {
-    navigator.clipboard.readText()
-        .then(text => {
-            out.value = text;
-            log('Text pasted.');
+    navigator.clipboard.read()
+        .then(function dataRead(data) {
+
+            var mimeType = "";
+            for (var i = 0; i < data[0].types.length; i++) {
+                if (data[0].types[i] == "text/plain") {
+                    mimeType = data[0].types[i];
+                    break;
+                }
+                else if (data[0].types[i] == "image/png") {
+                    mimeType = data[0].types[i];
+                    break;
+                }
+                else {
+                }
+            }
+
+            var blob = null;
+            try {
+                if (mimeType == "text/plain") {
+                    data[0].getType("text/plain").then(function typeRead(obj) {
+                        obj.text().then(function textRead(text) {
+                            blob = text;
+                            out.value = text;
+                            log('Text pasted.');
+                        });
+                    });
+                }
+                else if (mimeType == "image/png") {
+                    data[0].getType("image/png").then(function typeRead(obj) {
+                        blob = obj;
+                    });
+                }
+                else {
+                    mimeType = "text/plain";
+                    blob = "";
+                }
+            }
+            catch (err) {
+                console.error(err.name, err.message);
+            }
+
         })
         .catch(() => {
             log('Failed to read clipboard');

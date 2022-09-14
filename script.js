@@ -86,3 +86,63 @@ function log(value) {
         toast.hidden = true;
     }, 3000);
 }
+
+/** Checks whether the clipboard data has changed */
+function checkClipboard() {
+
+    if (navigator.clipboard && navigator.clipboard.read) {
+    
+        navigator.clipboard.read().then(async function dataRead(data) {
+
+            var mimeType = "";
+            for (var i = 0; i < data[0].types.length; i++) {
+                if (data[0].types[i] == "text/plain") {
+                    mimeType = data[0].types[i];
+                    break;
+                }
+                else if (data[0].types[i] == "image/png") {
+                    mimeType = data[0].types[i];
+                    break;
+                }
+                else {
+                }
+            }
+
+            var blob = null;
+            try{
+                if (mimeType == "text/plain") {
+                    blob = await data[0].getType("text/plain");
+                    if (!!blob) {
+                        blob = await blob.text();
+                        out.value = blob;
+                    }
+                }
+                else if (mimeType == "image/png") {
+                    blob = await data[0].getType("image/png");
+                }
+                else {
+                    mimeType = "text/plain";
+                    blob = "";
+                }
+            }
+            catch (err) {
+                console.error(err.name, err.message);
+            }
+
+        })
+        .catch(() => {
+            log('Failed to read clipboard when focusing this page');
+        });
+
+    }
+
+}
+
+window.addEventListener('copy',  checkClipboard);
+window.addEventListener('cut',   checkClipboard);
+window.addEventListener('focus', function focusGained(e) {
+
+    if (e.target === window)
+        checkClipboard();
+
+}, true);

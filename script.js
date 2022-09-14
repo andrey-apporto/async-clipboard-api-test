@@ -68,8 +68,6 @@ Promise.all(
     });
 });
 
-
-
 function permissionName(permission) {
     let name = permission.name.split('-').pop();
     if ('allowWithoutGesture' in permission) {
@@ -77,7 +75,6 @@ function permissionName(permission) {
     }
     return name;
 }
-
 
 function log(value) {
     clearTimeout(log.timer);
